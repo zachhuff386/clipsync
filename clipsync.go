@@ -13,30 +13,30 @@ extern void clipboardSet(char *data);
 import "C"
 
 import (
-	"unsafe"
-	"time"
 	"fmt"
+	"time"
+	"unsafe"
 )
 
 func main() {
 	for {
-	  C.clipboardWait()
+		C.clipboardWait()
 
-    start1 := time.Now()
-    buffer := C.clipboardGet()
-    data := C.GoString(buffer)
-    C.free(unsafe.Pointer(buffer))
-    end1 := time.Since(start1)
+		start1 := time.Now()
+		buffer := C.clipboardGet()
+		data := C.GoString(buffer)
+		C.free(unsafe.Pointer(buffer))
+		end1 := time.Since(start1)
 
-    start2 := time.Now()
-    bufferC := C.CString(data)
-    C.clipboardSet(bufferC)
-    C.free(unsafe.Pointer(bufferC))
-    end2 := time.Since(start2)
+		start2 := time.Now()
+		bufferC := C.CString(data)
+		C.clipboardSet(bufferC)
+		C.free(unsafe.Pointer(bufferC))
+		end2 := time.Since(start2)
 
-    println("***********************************************");
-    fmt.Println(end1)
-    fmt.Println(end2)
-    println("***********************************************");
+		println("***********************************************")
+		fmt.Println(end1)
+		fmt.Println(end2)
+		println("***********************************************")
 	}
 }
