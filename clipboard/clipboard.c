@@ -108,14 +108,8 @@ void clipboardWait() {
 		exit(971);
 	}
 
-	XFlush(display);
-	XSync(display, True);
-
 	XFixesSelectSelectionInput(display, window,
 		clipAtom, XFixesSetSelectionOwnerNotifyMask);
-
-	XFlush(display);
-	XSync(display, True);
 
 	XEvent event;
 	while (True) {
@@ -429,6 +423,4 @@ void clipboardSet(char *data) {
 
 	windowClose(display, window);
 	displayClose(display);
-
-	sleep(100);
 }
