@@ -42,7 +42,7 @@ nano clipsync.conf
 
 ```bash
 ./clipsync generate-key
-public_key=oDKlgt9NsfJObrQu+Xp2GTLY80EpGkW0Hr09bBwsUTI
+public_key=C4HZ1DkOIbG3u2zqC4mL8JPhliOfjex0h3E3XoKfJhw
 
 nano clipsync.conf
 {
