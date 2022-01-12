@@ -207,13 +207,13 @@ char * selectionGet(Display *display, Window window, Time timestamp,
 
 			break;
 		}  else {
-			fprintf(stderr, "Unexpected selection event %d\n",
-				convertEvent.type);
+//			fprintf(stderr, "Unexpected selection event %d\n",
+//				convertEvent.type);
 		}
 	}
 
 	if (convertEvent.xselection.property == None) {
-		fprintf(stderr, "Get selection conversion refused\n");
+//		fprintf(stderr, "Get selection conversion refused\n");
 		return NULL;
 	}
 
