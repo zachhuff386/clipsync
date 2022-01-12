@@ -89,7 +89,6 @@ func initWatch() {
 
 		clipboard.Wait()
 		if time.Since(lastSet) < 100*time.Millisecond {
-			println("ignore")
 			continue
 		}
 		lastSet = time.Now()
