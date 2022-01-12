@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/dropbox/godropbox/errors"
@@ -98,67 +97,68 @@ func initWatch() {
 			continue
 		}
 
-		err := handleClipboardChange(data)
-		if err != nil {
-			utils.LogError(err)
-			continue
-		}
+		handleClipboardChange(data)
 	}
 }
 
-func handleClipboardChange(dataStr string) (err error) {
-	waiter := sync.WaitGroup{}
+func handleClipboardChange(dataStr string) {
 	data := []byte(dataStr)
 
 	for _, client := range config.Config.Clients {
-		waiter.Add(1)
 		go func(clnt *config.Client) {
-			defer waiter.Done()
-
-			encData, e := crypto.Encrypt(clnt.PublicKey, data)
-			if e != nil {
-				err = e
-				return
-			}
-
-			u := &url.URL{
-				Scheme: "http",
-				Host:   clnt.Address,
-				Path:   fmt.Sprintf("/v1/%s", config.Config.PublicKey),
-			}
-
-			req, e := http.NewRequest(
-				"POST",
-				u.String(),
-				bytes.NewBuffer(encData),
-			)
-			if e != nil {
-				err = &errortypes.RequestError{
-					errors.Wrap(e, "server: Client request error"),
-				}
-				return
-			}
-
-			req.Header.Set("User-Agent", "clipsync")
-
-			res, e := httpClient.Do(req)
-			if e != nil {
-				err = &errortypes.RequestError{
-					errors.Wrap(e, "server: Client response error"),
-				}
-				return
-			}
-
-			if res.StatusCode != 200 {
-				err = &errortypes.RequestError{
-					errors.Newf(
-						"server: Client response status '%d'",
-						res.StatusCode,
-					),
-				}
+			err := sendClipboardChange(clnt, data)
+			if err != nil {
+				utils.LogError(err)
 				return
 			}
 		}(client)
+	}
+
+	return
+}
+
+func sendClipboardChange(clnt *config.Client, data []byte) (err error) {
+	encData, err := crypto.Encrypt(clnt.PublicKey, data)
+	if err != nil {
+		return
+	}
+
+	u := &url.URL{
+		Scheme: "http",
+		Host:   clnt.Address,
+		Path:   fmt.Sprintf("/v1/%s", config.Config.PublicKey),
+	}
+
+	req, err := http.NewRequest(
+		"POST",
+		u.String(),
+		bytes.NewBuffer(encData),
+	)
+	if err != nil {
+		err = &errortypes.RequestError{
+			errors.Wrap(err, "server: Client request error"),
+		}
+		return
+	}
+
+	req.Header.Set("User-Agent", "clipsync")
+
+	res, err := httpClient.Do(req)
+	if err != nil {
+		err = &errortypes.RequestError{
+			errors.Wrap(err, "server: Client response error"),
+		}
+		return
+	}
+
+	if res.StatusCode != 200 {
+		err = &errortypes.RequestError{
+			errors.Newf(
+				"server: Client response status '%d'",
+				res.StatusCode,
+			),
+		}
+		return
 	}
 
 	return
