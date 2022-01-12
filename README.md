@@ -22,7 +22,7 @@ CGO_ENABLED=1 go build -v
 ./clipsync generate-key
 public_key=oDKlgt9NsfJObrQu+Xp2GTLY80EpGkW0Hr09bBwsUTI
 
-nano clipsync.conf
+tee ./clipsync.conf << EOF
 {
   "bind": "0.0.0.0:9774",
   "private_key": "3zyjOTKaXO0zFOIx2cOaeYBmQ8bSsQjTr9dLGBHTNto",
@@ -34,6 +34,7 @@ nano clipsync.conf
     }
   ]
 }
+EOF
 
 ./clipsync start
 ```
@@ -44,7 +45,7 @@ nano clipsync.conf
 ./clipsync generate-key
 public_key=C4HZ1DkOIbG3u2zqC4mL8JPhliOfjex0h3E3XoKfJhw
 
-nano clipsync.conf
+tee ./clipsync.conf << EOF
 {
   "bind": "0.0.0.0:9774",
   "private_key": "Vc7BVAyVFdtmvtOv5uhm/2/EoAZlOXvsL/QgCUVlVAg",
@@ -56,6 +57,32 @@ nano clipsync.conf
     }
   ]
 }
+EOF
 
 ./clipsync start
+```
+
+## Systemd User Service
+
+```bash
+sudo cp ./clipsync /usr/local/bin/clipsync
+cp ./clipsync.conf ~/.config/clipsync.conf
+
+mkdir -p ~/.config/systemd/user
+tee ~/.config/systemd/user/clipsync.service << EOF
+[Unit]
+Description=Clipsync
+Wants=gnome-session.target
+After=gnome-session.target
+
+[Service]
+ExecStart=/usr/local/bin/clipsync start $HOME/.config/clipsync.conf
+
+[Install]
+WantedBy=gnome-session.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable clipsync
+systemctl --user start clipsync
 ```
