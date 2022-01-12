@@ -60,6 +60,11 @@ func main() {
 
 	flag.Parse()
 
+	confPath := flag.Arg(1)
+	if confPath != "" {
+		config.Path = confPath
+	}
+
 	switch flag.Arg(0) {
 	case "version":
 		fmt.Printf("pritunl-link v%s\n", constants.Version)
