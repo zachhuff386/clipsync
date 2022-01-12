@@ -1,6 +1,5 @@
 package constants
 
 const (
-	Version  = "1.0.0.0"
-	ConfPath = "./clipsync.conf"
+	Version = "1.0.0.0"
 )

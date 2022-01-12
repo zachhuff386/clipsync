@@ -5,12 +5,14 @@ import (
 	"io/ioutil"
 
 	"github.com/dropbox/godropbox/errors"
-	"github.com/zachhuff386/clipsync/constants"
 	"github.com/zachhuff386/clipsync/errortypes"
 	"github.com/zachhuff386/clipsync/utils"
 )
 
-var Config = &ConfigData{}
+var (
+	Config = &ConfigData{}
+	Path   = "./clipsync.conf"
+)
 
 type Client struct {
 	Address   string `json:"address"`
@@ -41,7 +43,7 @@ func (c *ConfigData) Save() (err error) {
 		return
 	}
 
-	err = ioutil.WriteFile(constants.ConfPath, data, 0600)
+	err = ioutil.WriteFile(Path, data, 0600)
 	if err != nil {
 		err = &errortypes.WriteError{
 			errors.Wrap(err, "config: File write error"),
@@ -58,7 +60,7 @@ func Load() (err error) {
 		Clients: []*Client{},
 	}
 
-	exists, err := utils.Exists(constants.ConfPath)
+	exists, err := utils.Exists(Path)
 	if err != nil {
 		return
 	}
@@ -69,7 +71,7 @@ func Load() (err error) {
 		return
 	}
 
-	file, err := ioutil.ReadFile(constants.ConfPath)
+	file, err := ioutil.ReadFile(Path)
 	if err != nil {
 		err = &errortypes.ReadError{
 			errors.Wrap(err, "config: File read error"),
