@@ -4,8 +4,6 @@ package clipboard
 #cgo LDFLAGS: -lX11 -lXfixes
 #include <stdio.h>
 #include <stdlib.h>
-extern void clipboardInit();
-extern void clipboardExit();
 extern void clipboardWait();
 extern char * clipboardGet();
 extern void clipboardSet(char *data);

@@ -391,8 +391,6 @@ void selectionSet(Display *display, Window window, Time timestamp,
 	}
 
 	timestamp = timestampGet(display, window);
-
-	XSync(display, False);
 }
 
 char * clipboardGet() {
