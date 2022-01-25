@@ -7,7 +7,7 @@ import (
 
 	"github.com/dropbox/godropbox/errors"
 	"github.com/zachhuff386/clipsync/config"
-	"github.com/zachhuff386/youtube/errortypes"
+	"github.com/zachhuff386/clipsync/errortypes"
 	"golang.org/x/crypto/nacl/box"
 )
 
