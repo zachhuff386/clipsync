@@ -14,15 +14,28 @@ import "C"
 
 import (
 	"sync"
+	"time"
 	"unsafe"
 )
 
 var (
-	lock = sync.Mutex{}
+	lock       = sync.Mutex{}
+	lastChange = time.Now()
 )
 
 func Wait() {
-	C.clipboardWait()
+	for {
+		C.clipboardWait()
+		lock.Lock()
+		if time.Since(lastChange) < 200*time.Millisecond {
+			lock.Unlock()
+			continue
+		} else {
+			lastChange = time.Now()
+			lock.Unlock()
+			break
+		}
+	}
 }
 
 func Get() string {
@@ -39,5 +52,6 @@ func Set(data string) {
 	buffer := C.CString(data)
 	C.clipboardSet(buffer)
 	C.free(unsafe.Pointer(buffer))
+	lastChange = time.Now()
 	lock.Unlock()
 }

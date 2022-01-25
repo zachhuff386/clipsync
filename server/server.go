@@ -18,7 +18,6 @@ import (
 )
 
 var (
-	lastSet    = time.Now()
 	httpClient = &http.Client{
 		Timeout: 15 * time.Second,
 	}
@@ -87,10 +86,6 @@ func initWatch() {
 		time.Sleep(10 * time.Millisecond)
 
 		clipboard.Wait()
-		if time.Since(lastSet) < 100*time.Millisecond {
-			continue
-		}
-		lastSet = time.Now()
 
 		data := clipboard.Get()
 		if data == "" {
