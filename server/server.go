@@ -2,11 +2,13 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dropbox/godropbox/errors"
@@ -18,7 +20,10 @@ import (
 )
 
 var (
-	httpClient = &http.Client{
+	handleLock   sync.Mutex
+	handleCtx    context.Context
+	handleCancel context.CancelFunc
+	httpClient   = &http.Client{
 		Timeout: 15 * time.Second,
 	}
 )
@@ -48,7 +53,11 @@ func initHttp() {
 			}
 			_ = req.Body.Close()
 
-			err = handleClipboardReq(req.URL.Path[4:], data)
+			if config.Config.Retry {
+				err = handleClipboardReqRetry(req.URL.Path[4:], data)
+			} else {
+				err = handleClipboardReq(req.URL.Path[4:], data)
+			}
 			if err != nil {
 				utils.LogError(err)
 				utils.WriteText(w, 500, "Clipboard Error")
@@ -77,6 +86,62 @@ func handleClipboardReq(clientId string, encData []byte) (err error) {
 	}
 
 	clipboard.Set(string(data))
+
+	return
+}
+
+func handleClipboardReqRetry(clientId string, encData []byte) (err error) {
+	handleLock.Lock()
+	if handleCancel != nil {
+		handleCancel()
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	handleCtx = ctx
+	handleCancel = cancel
+	handleLock.Unlock()
+
+	defer func() {
+		handleLock.Lock()
+		if ctx == handleCtx {
+			handleCtx = nil
+			handleCancel = nil
+		}
+		handleLock.Unlock()
+		cancel()
+	}()
+
+	data, err := crypto.Decrypt(clientId, encData)
+	if err != nil {
+		return
+	}
+
+	newData := string(data)
+	for i := 0; i < 20; i++ {
+		select {
+		case <-ctx.Done():
+			fmt.Println("Cancel clipboard set")
+			return
+		default:
+		}
+
+		if i > 0 {
+			fmt.Printf("Failed to set clipboard %d times, retrying...\n", i)
+		}
+		clipboard.Set(newData)
+
+		select {
+		case <-time.After(50 * time.Millisecond):
+		case <-ctx.Done():
+			fmt.Println("Cancel clipboard compare")
+			return
+		}
+
+		curData := clipboard.Get()
+		if curData == newData {
+			break
+		}
+	}
 
 	return
 }
