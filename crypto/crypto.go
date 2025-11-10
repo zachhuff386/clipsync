@@ -146,7 +146,7 @@ func Decrypt(clientId string, encData []byte) (data []byte, err error) {
 	if !ok {
 		data = nil
 		err = &errortypes.ParseError{
-			errors.Wrap(err, "crypto: Failed to decrypt client data"),
+			errors.New("crypto: Failed to decrypt client data"),
 		}
 		return
 	}

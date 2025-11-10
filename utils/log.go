@@ -4,6 +4,6 @@ import (
 	"fmt"
 )
 
-func LogError(err error) {
-	fmt.Println(err.Error())
+func LogError(clientId string, err error) {
+	fmt.Printf("[%s] %s\n", clientId, err.Error())
 }

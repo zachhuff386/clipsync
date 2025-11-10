@@ -53,13 +53,14 @@ func initHttp() {
 			}
 			_ = req.Body.Close()
 
+			clientId := req.URL.Path[4:]
 			if config.Config.Retry {
-				err = handleClipboardReqRetry(req.URL.Path[4:], data)
+				err = handleClipboardReqRetry(clientId, data)
 			} else {
-				err = handleClipboardReq(req.URL.Path[4:], data)
+				err = handleClipboardReq(clientId, data)
 			}
 			if err != nil {
-				utils.LogError(err)
+				utils.LogError(clientId, err)
 				utils.WriteText(w, 500, "Clipboard Error")
 				return
 			}
@@ -168,7 +169,7 @@ func handleClipboardChange(dataStr string) {
 		go func(clnt *config.Client) {
 			err := sendClipboardChange(clnt, data)
 			if err != nil {
-				utils.LogError(err)
+				utils.LogError(clnt.PublicKey, err)
 				return
 			}
 		}(client)
