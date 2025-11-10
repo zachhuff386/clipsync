@@ -11,9 +11,7 @@ Requires Golang, X11 and XFixes libraries.
 
 ```bash
 sudo dnf install libX11-devel libXfixes-devel xorg-x11-proto-devel
-go get github.com/zachhuff386/clipsync
-cd ~/go/src/github.com/zachhuff386/clipsync
-CGO_ENABLED=1 go build -v
+CGO_ENABLED=1 go install github.com/zachhuff386/clipsync@latest
 ```
 
 ## Computer 111.111.111.111
@@ -53,7 +51,7 @@ tee ./clipsync.conf << EOF
   "clients": [
     {
       "address": "111.111.111.111:9774",
-      "public_key": "cjZ5vR4R2t3QI8xzMz0Jw2lGvnim3nBlsmiViyM0iWo"
+      "public_key": "oDKlgt9NsfJObrQu+Xp2GTLY80EpGkW0Hr09bBwsUTI"
     }
   ]
 }
@@ -84,5 +82,5 @@ EOF
 
 systemctl --user daemon-reload
 systemctl --user enable clipsync
-systemctl --user start clipsync
+systemctl --user restart clipsync
 ```
